@@ -30,8 +30,10 @@ void loop(){
  if(!Mirf.isSending() && Mirf.dataReady()){
    Serial.println("G");
    Mirf.getData((byte *)&data);
-   Serial.println(data.humidity);
-   Serial.println(data.celsius);
+   Serial.print(data.humidity);
+   Serial.print(',');
+   Serial.print(data.celsius);
+   Serial.print(',');
    //Serial.println(data.finalTempC);
    // Serial.println(data.vo);
    // Serial.println(data.lux);

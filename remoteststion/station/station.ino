@@ -1,10 +1,8 @@
-//#include <SoftwareSerial.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <math.h> 
-
 #include <DHT22.h>
 #include <BMP085.h>
 #include <nRF24L01.h>
@@ -12,22 +10,12 @@
 #include "nRF24L01.h"
 #include <RF24.h>
 #include <MirfHardwareSpiDriver.h>
-//#include "LowPower.h"
 #include <util/atomic.h>
 BMP085 dps = BMP085();
  ISR(WDT_vect) { watchdogEvent(); }
-
 int serialValue;
 DHT22 myDHT22(9);
-
-
-//int l;
-//byte buff[2];
-//BH1750 lightMeter;
-//uint16_t val=0;
-
 const unsigned char OSS = 0;  // Oversampling Setting
-//int tempReading = 0;
 
 #define DS00OV	0x80
 #define DS00UV	0x40
@@ -68,16 +56,14 @@ void setup(){
 pinMode(DHTPOEWR, OUTPUT); 
 pinMode(13, OUTPUT); 
 digitalWrite(DHTPOEWR,HIGH);
-   Mirf.csnPin = 6;
-    Mirf.cePin = 10;
-  
+  Mirf.csnPin = 6;
+  Mirf.cePin = 10;
   Mirf.spi = &MirfHardwareSpi;
   Mirf.init();
   Mirf.setRADDR((byte *)"clie1");
   Mirf.payload = sizeof(data);
   Mirf.config();
   
-  Serial.begin(19200);
   Wire.begin();
   delay(100);
   dps.init(MODE_ULTRA_HIGHRES, 0, true);
@@ -98,7 +84,7 @@ void loop(){
       readDHT2(); //2104
       digitalWrite(DHTPOEWR,LOW);
       dps.getPressure(&data.pressure);
-      Serial.println(data.pressure);
+  //    Serial.println(data.pressure);
       
       digitalWrite(13, HIGH);
       sendnrf();
@@ -106,7 +92,7 @@ void loop(){
        loseSomeTime (100);
   
       powerDown2();
-      loseSomeTime (6000);
+      loseSomeTime (30000);
      
 }
 
@@ -193,60 +179,24 @@ void sendnrf(){
   while(Mirf.isSending()){
   }
   Serial.println("Finished sending");
- // delay(10);
-  //while(!Mirf.dataReady()){
-    //Serial.println("Waiting");
- //   if ( ( millis() - time ) > 1000 ) {
- //     Serial.println("Timeout on response from server!");
-//      return;
-//    }
- // }
-  
-//  Mirf.getData((byte *) &time);
-  
-  //Serial.print("Ping: ");
- // Serial.println((millis() - time));
-  
-//  delay(1000);
-  
-  
-  
-  
-}
+  }
 void readDHT2(){
   DHT22_ERROR_t errorCode;
-  
-  // The sensor can only be read from every 1-2s, and requires a minimum
-  // 2s warm-up after power-on.
   loseSomeTime (2100);
-  
-  //Serial.print("Requesting data...");
   errorCode = myDHT22.readData();
   if (errorCode ==  DHT_ERROR_NONE)
   {
-     // Serial.print("Got Data ");
       data.celsius = myDHT22.getTemperatureC();
-      Serial.println(data.celsius);
+    //  Serial.println(data.celsius);
       data.humidity =  myDHT22.getHumidity();
-    //  Serial.print("C ");
-      Serial.println(data.humidity);
+      //Serial.println(data.humidity);
   }
-   //   Serial.println("%");
-      // Alternately, with integer formatting which is clumsier but more compact to store and
-	  // can be compared reliably for equality:
-	  //	  
-    //  char buf[128];
-     // sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
-            //       myDHT22.getTemperatureCInt()/10, abs(myDHT22.getTemperatureCInt()%10),
-          //         myDHT22.getHumidityInt()/10, myDHT22.getHumidityInt()%10);
-   //   Serial.println(buf);
-   
-  
 }
 void powerDown2()
 {
   write_register(CONFIG,read_register(CONFIG) & ~_BV(PWR_UP));
 }
+
 uint8_t write_register(uint8_t reg, uint8_t value)
 {
 uint8_t status;
@@ -295,9 +245,6 @@ double dewPoint(double celsius, double humidity)
         return (241.88 * T) / (17.558-T);
 }
 
-
-
-
 void temp()
 {
   double a = analogRead(A3) * 5.0 / 1024.0;
@@ -306,9 +253,6 @@ void temp()
   double w = (1.0/((log(x/10000.0))/3950.0 + (1/288.15)))-273.15+10.0;//offset=10
   Serial.println(w);
 } 
-
-// Stores all of the bmp085's calibration values into global variables
-// Calibration values are required to calculate temp and pressure
 
 
 void writeRegister(int deviceAddress, byte address, byte val) {
@@ -334,9 +278,6 @@ int readRegister(int deviceAddress, byte address){
   v = Wire.read();
   return v;
 }
-
-
-
 
 void wakeUpNow()        
 {
