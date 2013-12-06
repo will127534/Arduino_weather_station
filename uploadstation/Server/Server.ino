@@ -16,6 +16,7 @@ float kPressure;
 } ;
  config_type data;
 void setup(){
+  pinMode(13,OUTPUT);
 Serial.begin(9600);
 Mirf.spi = &MirfHardwareSpi;
 Mirf.init();
@@ -27,8 +28,10 @@ Serial.println("Listening...");
 }
 
 void loop(){
- if(!Mirf.isSending() && Mirf.dataReady()){
-   Serial.println("G");
+ 
+  if(!Mirf.isSending() && Mirf.dataReady()){
+    digitalWrite(13,HIGH);
+  // Serial.println("G");
    Mirf.getData((byte *)&data);
    Serial.print(data.humidity);
    Serial.print(',');
@@ -37,7 +40,12 @@ void loop(){
    //Serial.println(data.finalTempC);
    // Serial.println(data.vo);
    // Serial.println(data.lux);
-   Serial.println(data.pressure);
+   Serial.print(data.pressure);
+   Serial.print(',');
+   Serial.print(data.vo);
+   Serial.print(',');
+   Serial.println(data.mah);
+    digitalWrite(13,LOW);
    //  Serial.println(data.mah);
   }
 }

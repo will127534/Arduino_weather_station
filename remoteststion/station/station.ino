@@ -63,7 +63,7 @@ digitalWrite(DHTPOEWR,HIGH);
   Mirf.setRADDR((byte *)"clie1");
   Mirf.payload = sizeof(data);
   Mirf.config();
-  
+  //Serial.begin(9600);
   Wire.begin();
   delay(100);
   dps.init(MODE_ULTRA_HIGHRES, 0, true);
@@ -85,7 +85,11 @@ void loop(){
       digitalWrite(DHTPOEWR,LOW);
       dps.getPressure(&data.pressure);
   //    Serial.println(data.pressure);
-      
+       data.vo = getdsVoltage();
+       data.mah = getdsmah();
+      // Serial.println(data.pressure);
+      // Serial.println(data.celsius);
+     //  Serial.println(data.vo);
       digitalWrite(13, HIGH);
       sendnrf();
       digitalWrite(13, LOW);
